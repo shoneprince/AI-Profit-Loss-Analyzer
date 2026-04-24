@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>P&L Analyzer - Executive Summary</title>
+    <meta name="description"
+        content="AI-powered financial analysis report with executive summary, period comparison, risk analysis, and KPI insights." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "accent": "#6366f1",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: { "display": ["Public Sans", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Public Sans', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Markdown-like formatting for AI responses */
+        .ai-content h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-content p {
+            line-height: 1.75;
+            margin-bottom: 0.75rem;
+        }
+
+        .ai-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0;
+        }
+
+        .ai-content li {
+            padding: 0.25rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .ai-content li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #ec5b13;
+            font-weight: bold;
+        }
+
+        .ai-content strong {
+            color: #f1f5f9;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar Navigation -->
+        <aside class="w-72 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-900/50">
+            <div class="p-6 flex items-center gap-3">
+                <div class="bg-primary p-2 rounded-lg text-white">
+                    <span class="material-symbols-outlined block">analytics</span>
+                </div>
+                <a href="index.html" class="text-xl font-bold tracking-tight hover:text-primary transition-colors">P&L
+                    Analyzer</a>
+            </div>
+
+            <nav class="flex-1 px-3 py-4 space-y-1">
+                <div class="px-3 mb-2">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Analysis Views</p>
+                </div>
+                <button data-tab="summary"
+                    class="tab-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg bg-primary/10 text-primary border-l-4 border-primary font-semibold text-left">
+                    <span class="material-symbols-outlined">description</span>
+                    <span>Executive Summary</span>
+                </button>
+                <button data-tab="comparison"
+                    class="tab-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent text-left">
+                    <span class="material-symbols-outlined">compare_arrows</span>
+                    <span>Period Comparison</span>
+                </button>
+                <button data-tab="risk"
+                    class="tab-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent text-left">
+                    <span class="material-symbols-outlined">warning</span>
+                    <span>Risk Analysis</span>
+                </button>
+                <button data-tab="kpi"
+                    class="tab-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent text-left">
+                    <span class="material-symbols-outlined">query_stats</span>
+                    <span>KPI Insights</span>
+                </button>
+            </nav>
+
+            <!-- Back to Home -->
+            <div class="p-4 border-t border-slate-800">
+                <a href="index.html"
+                    class="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Upload Another File
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+
+            <!-- Header/Breadcrumbs -->
+            <header
+                class="sticky top-0 z-10 flex items-center justify-between px-8 py-4 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2 text-sm">
+                    <a href="index.html" class="text-slate-500 hover:text-primary transition-colors">Home</a>
+                    <span class="material-symbols-outlined text-xs text-slate-400">chevron_right</span>
+                    <span class="text-slate-500">Analysis</span>
+                    <span class="material-symbols-outlined text-xs text-slate-400">chevron_right</span>
+                    <span id="breadcrumbFile" class="font-medium text-slate-900 dark:text-white">Loading...</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="sectionCount" class="text-xs text-slate-400 bg-slate-800 px-3 py-1 rounded-full"></span>
+                </div>
+            </header>
+
+            <div class="p-8 max-w-5xl mx-auto w-full space-y-10">
+
+                <!-- Title Section -->
+                <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-8">
+                    <h1 id="pageTitle" class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+                        Executive Summary</h1>
+                    <p id="pageSubtitle" class="text-slate-500 dark:text-slate-400 text-lg">Detailed P&L analysis</p>
+                </div>
+
+                <!-- AI Analysis Content -->
+                <div id="analysisContent" class="grid grid-cols-1 gap-12">
+                    <!-- Loading state -->
+                    <div id="loadingState" class="flex flex-col items-center justify-center py-20 gap-4">
+                        <span class="material-symbols-outlined text-5xl text-primary spinner">progress_activity</span>
+                        <p class="text-slate-400 text-lg">Generating AI analysis...</p>
+                        <p class="text-slate-500 text-sm">This may take a few seconds</p>
+                    </div>
+                </div>
+
+                <!-- KPI Badges Row -->
+                <div id="kpiBadges"
+                    class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-8 border-t border-slate-200 dark:border-slate-800 hidden">
+                    <!-- Filled dynamically -->
+                </div>
+
+                <!-- Footer Action — Dashboard Button -->
+                <div class="pt-6 pb-20 text-center">
+                    <a href="dashboard.html" id="dashboardBtn"
+                        class="w-full max-w-md bg-primary text-white py-4 px-8 rounded-xl text-lg font-bold shadow-2xl shadow-primary/30 hover:scale-[1.02] transition-transform flex items-center justify-center gap-3 mx-auto inline-flex">
+                        View Interactive Dashboard
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                    <p id="lastUpdated" class="mt-4 text-slate-500 text-sm"></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+
+        // ── Tab config mapping to prompts.py ────────────────────
+        const TABS = {
+            summary: {
+                title: "Executive Summary",
+                subtitle: "Comprehensive P&L overview with revenue, expenses, and profitability analysis",
+                question: "Provide a comprehensive summary of this P&L statement",
+                icon: "description",
+            },
+            comparison: {
+                title: "Period Comparison",
+                subtitle: "Quarter-over-quarter and period-over-period trend analysis",
+                question: "Compare the periods in this P&L and highlight key changes",
+                icon: "compare_arrows",
+            },
+            risk: {
+                title: "Risk Analysis",
+                subtitle: "Financial risk indicators, margin pressures, and operational warnings",
+                question: "Analyze the financial risks in this P&L statement",
+                icon: "warning",
+            },
+            kpi: {
+                title: "KPI Insights",
+                subtitle: "Key performance indicators interpretation and industry benchmarking",
+                question: "Interpret all KPIs and compare against industry benchmarks",
+                icon: "query_stats",
+            },
+        };
+
+        // ── Cache for API responses (persisted across navigation) ──
+        // Stored in sessionStorage so back-navigation doesn't regenerate.
+        const CACHE_KEY = "pl_insight_cache";
+        const KPI_CACHE_KEY = "pl_kpi_cache";
+
+        function _loadCache() {
+            try { return JSON.parse(sessionStorage.getItem(CACHE_KEY) || "{}"); }
+            catch { return {}; }
+        }
+        function _saveCache(cache) {
+            try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(cache)); } catch { }
+        }
+
+        const responseCache = _loadCache();
+        let currentTab = "summary";
+        let uploadData = null;
+        let kpiData = null;
+
+        // ── Init ────────────────────────────────────────────────
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Check if we have upload data from the landing page
+            const stored = sessionStorage.getItem("pl_upload");
+            const filename = sessionStorage.getItem("pl_filename");
+
+            if (!stored) {
+                // No data — redirect back to upload
+                window.location.href = "index.html";
+                return;
+            }
+
+            uploadData = JSON.parse(stored);
+            document.getElementById("breadcrumbFile").textContent = filename || "Report";
+            document.getElementById("sectionCount").textContent = `${uploadData.sections?.length || 0} sections detected`;
+
+            // Show timestamp
+            const now = new Date();
+            document.getElementById("lastUpdated").textContent =
+                `Analysis generated on ${now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} at ${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
+
+            // Fetch KPIs
+            await loadKPIs();
+
+            // Load default tab
+            switchTab("summary");
+
+            // Tab click handlers
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+            });
+        });
+
+        // ── Load KPIs ───────────────────────────────────────────
+        async function loadKPIs() {
+            // Check sessionStorage first — avoids re-fetching on back-navigation
+            const cached = sessionStorage.getItem(KPI_CACHE_KEY);
+            if (cached) {
+                try {
+                    kpiData = JSON.parse(cached);
+                    renderKPIBadges(kpiData);
+                    return;
+                } catch { }
+            }
+            try {
+                const res = await fetch(`${API_BASE}/api/kpis`);
+                if (res.ok) {
+                    const data = await res.json();
+                    kpiData = data.kpis;
+                    sessionStorage.setItem(KPI_CACHE_KEY, JSON.stringify(kpiData));
+                    renderKPIBadges(kpiData);
+                }
+            } catch (e) {
+                console.error("KPI fetch failed:", e);
+                // Use KPIs from upload response as fallback
+                if (uploadData?.kpis) {
+                    kpiData = uploadData.kpis;
+                    sessionStorage.setItem(KPI_CACHE_KEY, JSON.stringify(kpiData));
+                    renderKPIBadges(kpiData);
+                }
+            }
+        }
+
+        // ── Render KPI Badges ───────────────────────────────────
+        function renderKPIBadges(kpis) {
+            const container = document.getElementById("kpiBadges");
+            if (!kpis) return;
+
+            const badges = [
+                { label: "Revenue", key: "revenue", format: "currency" },
+                { label: "Gross Margin", key: "gross_margin_pct", format: "pct" },
+                { label: "Net Margin", key: "net_margin_pct", format: "pct" },
+            ];
+
+            container.innerHTML = badges.map(b => {
+                const val = kpis[b.key];
+                if (val == null) return "";
+                const formatted = b.format === "currency"
+                    ? `₹${(val / 1e6).toFixed(1)}M`
+                    : `${val.toFixed(1)}%`;
+                const color = val > 0 ? "text-emerald-500" : "text-rose-500";
+                return `
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex flex-col items-center text-center">
+                        <span class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">${b.label}</span>
+                        <span class="text-3xl font-black text-slate-900 dark:text-white">${formatted}</span>
+                        <div class="mt-2 flex items-center gap-1 ${color} text-xs font-bold">
+                            <span class="material-symbols-outlined text-xs">${val > 0 ? 'trending_up' : 'trending_down'}</span>
+                            From uploaded data
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            container.classList.remove("hidden");
+        }
+
+        // ── Switch Tab ──────────────────────────────────────────
+        async function switchTab(tabId) {
+            currentTab = tabId;
+            const tab = TABS[tabId];
+
+            // Update title
+            document.getElementById("pageTitle").textContent = tab.title;
+            document.getElementById("pageSubtitle").textContent = tab.subtitle;
+            document.title = `P&L Analyzer - ${tab.title}`;
+
+            // Update sidebar active state
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.className = "tab-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg bg-primary/10 text-primary border-l-4 border-primary font-semibold text-left";
+                } else {
+                    btn.className = "tab-btn w-full flex items-center gap-3 px-3 py-3 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-l-4 border-transparent text-left";
+                }
+            });
+
+            // Check cache first
+            if (responseCache[tabId]) {
+                renderAnalysis(responseCache[tabId], tabId);
+                return;
+            }
+
+            // Show loading
+            document.getElementById("analysisContent").innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 gap-4">
+                    <span class="material-symbols-outlined text-5xl text-primary spinner">progress_activity</span>
+                    <p class="text-slate-400 text-lg">Generating ${tab.title}...</p>
+                    <p class="text-slate-500 text-sm">AI is analyzing your P&L data</p>
+                </div>
+            `;
+
+            // Call API
+            try {
+                const res = await fetch(`${API_BASE}/api/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: tab.question }),
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || "Query failed");
+                }
+
+                const data = await res.json();
+                responseCache[tabId] = data;
+                _saveCache(responseCache);
+                renderAnalysis(data, tabId);
+
+            } catch (error) {
+                console.error("Query error:", error);
+                renderFallback(error.message, tabId);
+            }
+        }
+
+        // ── Render AI Analysis ──────────────────────────────────
+        function renderAnalysis(data, tabId) {
+            const content = document.getElementById("analysisContent");
+            const answer = data.answer || "";
+
+            // Parse the AI response into sections
+            const sections = parseAIResponse(answer);
+
+            let html = '<div class="fade-in grid grid-cols-1 gap-12">';
+
+            sections.forEach((section, i) => {
+                const isRisk = section.title?.toLowerCase().includes("risk") || section.title?.toLowerCase().includes("warning");
+                const borderColor = isRisk ? "border-amber-500/30" : "border-slate-200 dark:border-slate-800";
+                const titleColor = isRisk ? "text-amber-500" : "";
+
+                html += `
+                    <section class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-primary font-bold text-lg">${String(i + 1).padStart(2, '0')}</span>
+                            <h2 class="text-2xl font-bold ${titleColor}">${section.title}</h2>
+                        </div>
+                        <div class="pl-8 border-l-2 ${borderColor} space-y-4">
+                            ${isRisk ? renderRiskContent(section.body) : renderBodyContent(section.body)}
+                        </div>
+                    </section>
+                `;
+            });
+
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        function renderBodyContent(body) {
+            // Convert markdown-like text to HTML
+            let html = '';
+            const lines = body.split('\n').filter(l => l.trim());
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || trimmed.startsWith('• ')) {
+                    html += `
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                            <span class="text-slate-600 dark:text-slate-300">${formatInlineText(trimmed.slice(2))}</span>
+                        </div>
+                    `;
+                } else {
+                    html += `<p class="leading-relaxed text-slate-600 dark:text-slate-300">${formatInlineText(trimmed)}</p>`;
+                }
+            }
+            return html;
+        }
+
+        function renderRiskContent(body) {
+            return `
+                <div class="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                    <div class="flex gap-3 text-amber-500">
+                        <span class="material-symbols-outlined">warning</span>
+                        <div class="space-y-2 text-slate-600 dark:text-slate-300">
+                            ${renderBodyContent(body)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatInlineText(text) {
+            // Bold: **text** → <strong>text</strong>
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 dark:text-white">$1</strong>')
+                .replace(/\$([\d,.]+)/g, '<span class="font-bold text-slate-900 dark:text-white">$$1</span>')
+                .replace(/([\d.]+%)/g, '<span class="font-bold text-emerald-500">$1</span>');
+        }
+
+        function parseAIResponse(text) {
+            // Split AI response into titled sections
+            const sections = [];
+            // Match headers like "## Title", "**Title**", "1. Title", "Title:"
+            const headerRegex = /(?:^|\n)(?:#{1,3}\s+|\*\*|(?:\d+\.?\s+))(.+?)(?:\*\*)?(?:\n|$)/g;
+            const parts = text.split(/\n(?:#{1,3}\s+|\d+\.\s+\*\*)/);
+
+            if (parts.length <= 1) {
+                // No clear sections — try splitting by numbered items or bold headers
+                const altParts = text.split(/\n\*\*[\d.]*\s*/);
+                if (altParts.length > 1) {
+                    altParts.forEach((part, i) => {
+                        const lines = part.split('\n').filter(l => l.trim());
+                        if (lines.length === 0) return;
+                        // First line might contain the title with trailing **
+                        let title = lines[0].replace(/\*\*/g, '').replace(/:$/, '').trim();
+                        const body = lines.slice(1).join('\n');
+                        if (title && body) {
+                            sections.push({ title, body });
+                        } else if (title) {
+                            sections.push({ title: `Section ${i + 1}`, body: title + '\n' + body });
+                        }
+                    });
+                }
+            } else {
+                parts.forEach((part, i) => {
+                    const lines = part.split('\n').filter(l => l.trim());
+                    if (lines.length === 0) return;
+                    let title = lines[0].replace(/[#*]+/g, '').replace(/:$/, '').trim();
+                    const body = lines.slice(1).join('\n');
+                    sections.push({ title, body: body || lines.join('\n') });
+                });
+            }
+
+            // Fallback: if parsing found nothing, show as single section
+            if (sections.length === 0) {
+                sections.push({
+                    title: TABS[currentTab]?.title || "Analysis",
+                    body: text
+                });
+            }
+
+            return sections;
+        }
+
+        // ── Fallback: Show static analysis from upload data ────
+        function renderFallback(errorMsg, tabId) {
+            const content = document.getElementById("analysisContent");
+            const kpis = uploadData?.kpis || {};
+
+            // Build a static report from the upload data
+            const revenue = kpis.revenue ? `₹${(kpis.revenue / 1e6).toFixed(1)}M` : "N/A";
+            const grossMargin = kpis.gross_margin_pct ? `${kpis.gross_margin_pct.toFixed(1)}%` : "N/A";
+            const opMargin = kpis.operating_margin_pct ? `${kpis.operating_margin_pct.toFixed(1)}%` : "N/A";
+            const netMargin = kpis.net_margin_pct ? `${kpis.net_margin_pct.toFixed(1)}%` : "N/A";
+            const cogs = kpis.cogs ? `₹${(kpis.cogs / 1e6).toFixed(1)}M` : "N/A";
+
+            content.innerHTML = `
+                <div class="fade-in grid grid-cols-1 gap-12">
+                    <!-- API Status -->
+                    <div class="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                        <div class="flex gap-3 text-amber-500">
+                            <span class="material-symbols-outlined">info</span>
+                            <div>
+                                <p class="font-bold">AI Analysis Unavailable</p>
+                                <p class="text-sm mt-1 text-slate-400">${errorMsg}. Showing KPI-based summary from extracted data.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Revenue -->
+                    <section class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-primary font-bold text-lg">01</span>
+                            <h2 class="text-2xl font-bold">Revenue Analysis</h2>
+                        </div>
+                        <div class="pl-8 border-l-2 border-slate-200 dark:border-slate-800 space-y-4">
+                            <p class="leading-relaxed text-slate-600 dark:text-slate-300">Total reported revenue: <span class="font-bold text-slate-900 dark:text-white">${revenue}</span></p>
+                            <div class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                                <span class="text-slate-300">Cost of Goods Sold: <strong class="text-white">${cogs}</strong></span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Profitability -->
+                    <section class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-primary font-bold text-lg">02</span>
+                            <h2 class="text-2xl font-bold">Profitability</h2>
+                        </div>
+                        <div class="pl-8 border-l-2 border-slate-200 dark:border-slate-800">
+                            <div class="bg-slate-50 dark:bg-slate-900/80 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
+                                        <span class="text-slate-500">Gross Margin</span>
+                                        <span class="text-emerald-500 font-bold text-xl">${grossMargin}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
+                                        <span class="text-slate-500">Operating Margin</span>
+                                        <span class="text-emerald-500 font-bold text-xl">${opMargin}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-slate-500">Net Margin</span>
+                                        <span class="text-emerald-500 font-bold text-xl">${netMargin}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Sections -->
+                    <section class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-primary font-bold text-lg">03</span>
+                            <h2 class="text-2xl font-bold">Detected Sections</h2>
+                        </div>
+                        <div class="pl-8 border-l-2 border-slate-200 dark:border-slate-800 space-y-2">
+                            ${(uploadData.sections || []).map(s => `
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                                    <span class="text-slate-300">${s}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </section>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>

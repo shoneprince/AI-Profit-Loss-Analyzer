@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>P&L Analyzer Dashboard</title>
+    <meta name="description"
+        content="Interactive P&L financial dashboard with KPI cards, charts, and AI-powered insights." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .chart-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bar {
+            transition: all 0.3s ease;
+        }
+
+        .bar:hover {
+            filter: brightness(1.2);
+            transform: scaleY(1.03);
+            transform-origin: bottom;
+        }
+
+        .gauge-bg {
+            stroke: #334155;
+        }
+
+        .gauge-fill {
+            stroke: #6366f1;
+            transition: stroke-dasharray 1s ease;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .margin-bar {
+            transition: width 1s ease;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header
+        class="h-16 border-b border-slate-800 px-6 flex items-center justify-between bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white">P</div>
+            <a href="index.html"
+                class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent hover:from-indigo-300 hover:to-white transition-all">
+                P&L Analyzer
+            </a>
+        </div>
+        <nav aria-label="Breadcrumb" class="hidden md:flex items-center text-sm text-slate-400 gap-2">
+            <a href="analysis.html" class="hover:text-white transition-colors">&larr; Back to Analysis</a>
+            <span class="text-slate-600">|</span>
+            <span>Dashboard</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+            </svg>
+            <span id="breadcrumbFile" class="text-indigo-400 font-medium">Loading...</span>
+        </nav>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="flex-1 p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+
+        <!-- KPI Row -->
+        <div id="kpiRow" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Revenue -->
+            <div class="chart-card p-5 rounded-xl border-t-4 border-t-emerald-500 shadow-lg">
+                <p class="text-slate-400 text-sm font-medium">Total Revenue</p>
+                <p id="kpiPeriodLabel" class="text-slate-500 text-[11px] mt-0.5"></p>
+                <div class="flex items-end justify-between mt-2">
+                    <h2 id="kpiRevenue" class="text-3xl font-bold">—</h2>
+                    <div id="kpiRevenueChangeWrap" class="flex items-center text-sm font-bold">
+                        <span id="kpiRevenueChange">—</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Net Income -->
+            <div class="chart-card p-5 rounded-xl border-t-4 border-t-indigo-500 shadow-lg">
+                <p class="text-slate-400 text-sm font-medium">Net Income</p>
+                <div class="flex items-end justify-between mt-2">
+                    <h2 id="kpiNetIncome" class="text-3xl font-bold">—</h2>
+                    <span id="kpiNetBadge"
+                        class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 uppercase tracking-wider">—</span>
+                </div>
+            </div>
+            <!-- Gross Margin -->
+            <div
+                class="chart-card p-5 rounded-xl border-t-4 border-t-amber-500 shadow-lg flex justify-between items-center">
+                <div>
+                    <p class="text-slate-400 text-sm font-medium">Gross Margin</p>
+                    <h2 id="kpiGrossMargin" class="text-3xl font-bold mt-2">—</h2>
+                    <p id="kpiGrossHealth" class="text-[11px] mt-1"></p>
+                </div>
+                <div class="relative w-12 h-12">
+                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                        <path class="gauge-bg"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none" stroke-width="3"></path>
+                        <path id="gaugeGross" class="gauge-fill"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none" stroke-linecap="round" stroke-width="3" stroke-dasharray="0 100"></path>
+                    </svg>
+                </div>
+            </div>
+            <!-- Operating Margin -->
+            <div class="chart-card p-5 rounded-xl border-t-4 border-t-cyan-500 shadow-lg">
+                <p class="text-slate-400 text-sm font-medium">Operating Margin</p>
+                <div class="flex items-end justify-between mt-2">
+                    <h2 id="kpiOpMargin" class="text-3xl font-bold">—</h2>
+                    <div class="h-2 w-24 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="opMarginBar" class="h-full bg-cyan-400 margin-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <p id="kpiOpHealth" class="text-[11px] mt-1"></p>
+            </div>
+            <!-- EBITDA Margin (C1) -->
+            <div class="chart-card p-5 rounded-xl border-t-4 border-t-purple-500 shadow-lg">
+                <p class="text-slate-400 text-sm font-medium">EBITDA Margin</p>
+                <div class="flex items-end justify-between mt-2">
+                    <h2 id="kpiEbitdaMargin" class="text-3xl font-bold">—</h2>
+                    <div class="h-2 w-24 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="ebitdaMarginBar" class="h-full bg-purple-400 margin-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <p id="kpiEbitdaHealth" class="text-[11px] mt-1"></p>
+            </div>
+        </div>
+
+        <!-- Chart Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Revenue vs Expenses -->
+            <div class="chart-card p-6 rounded-2xl">
+                <h3 class="text-lg font-semibold mb-6">Revenue vs Expenses</h3>
+                <div id="barChart" class="h-64 flex items-end justify-around gap-2 pb-2">
+                    <p class="text-slate-500 text-sm m-auto">Loading chart data...</p>
+                </div>
+                <div id="barLegend" class="mt-4 flex flex-wrap gap-4 text-xs text-slate-400 justify-center"></div>
+            </div>
+
+            <!-- Expense Breakdown -->
+            <div class="chart-card p-6 rounded-2xl flex flex-col">
+                <h3 class="text-lg font-semibold mb-6">Expense Breakdown</h3>
+                <div id="pieChart" class="flex flex-1 items-center justify-center gap-8">
+                    <p class="text-slate-500 text-sm">Loading chart data...</p>
+                </div>
+            </div>
+
+            <!-- Waterfall Bridge -->
+            <div class="chart-card p-6 rounded-2xl">
+                <h3 class="text-lg font-semibold mb-6">P&L Bridge (Revenue to Net)</h3>
+                <div id="waterfallChart" class="h-64 flex items-end gap-1 px-4">
+                    <p class="text-slate-500 text-sm m-auto">Loading chart data...</p>
+                </div>
+            </div>
+
+            <!-- Margin Analysis -->
+            <div class="chart-card p-6 rounded-2xl">
+                <h3 class="text-lg font-semibold mb-6">Margin Analysis</h3>
+                <div id="marginChart" class="space-y-8 mt-4">
+                    <p class="text-slate-500 text-sm">Loading chart data...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chat Panel -->
+        <section
+            class="chart-card rounded-2xl overflow-hidden border border-indigo-500/30 shadow-2xl shadow-indigo-500/5">
+            <div class="bg-slate-800/50 p-4 border-b border-slate-700 flex items-center gap-2">
+                <div class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                <h4 class="text-sm font-semibold text-slate-200">AI Financial Insights</h4>
+            </div>
+            <div id="chatMessages" class="p-6 h-40 overflow-y-auto space-y-4 scrollbar-hide">
+                <div class="flex gap-3 max-w-[80%]">
+                    <div
+                        class="w-8 h-8 rounded-full bg-indigo-600 flex-shrink-0 flex items-center justify-center text-[10px] font-bold">
+                        AI</div>
+                    <div class="bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-300 leading-relaxed">
+                        Upload a P&L file and ask me anything about your financial data. I can analyze trends, compare
+                        periods, and identify risks.
+                    </div>
+                </div>
+            </div>
+            <!-- C4: Suggested question chips -->
+            <div id="suggestedQuestions" class="px-4 pb-2 flex flex-wrap gap-2">
+                <button onclick="askSuggested('Summarize this P&L')" class="text-xs bg-slate-800 hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 px-3 py-1.5 rounded-full border border-slate-700 transition-colors">📊 Summarize this P&L</button>
+                <button onclick="askSuggested('What are the key risks?')" class="text-xs bg-slate-800 hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 px-3 py-1.5 rounded-full border border-slate-700 transition-colors">⚠️ Key Risks</button>
+                <button onclick="askSuggested('Compare margins across periods')" class="text-xs bg-slate-800 hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 px-3 py-1.5 rounded-full border border-slate-700 transition-colors">📈 Compare Margins</button>
+                <button onclick="askSuggested('Explain the KPIs')" class="text-xs bg-slate-800 hover:bg-indigo-600/30 text-slate-400 hover:text-indigo-300 px-3 py-1.5 rounded-full border border-slate-700 transition-colors">🎯 Explain KPIs</button>
+            </div>
+            <div class="p-4 bg-slate-800/30">
+                <div class="relative flex items-center">
+                    <input id="chatInput"
+                        class="w-full bg-slate-900 border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all pr-24"
+                        placeholder="Ask AI about your P&L data..." type="text" />
+                    <button id="chatSend"
+                        class="absolute right-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                        Send
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- C3: Raw Data Preview -->
+        <section id="dataPreviewSection" class="chart-card rounded-2xl overflow-hidden hidden">
+            <button onclick="toggleDataPreview()" class="w-full bg-slate-800/50 p-4 border-b border-slate-700 flex items-center justify-between hover:bg-slate-800 transition-colors">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm">📋</span>
+                    <h4 class="text-sm font-semibold text-slate-200">Raw Data Preview</h4>
+                </div>
+                <span id="dataPreviewToggle" class="text-slate-400 text-xs">▼ Show</span>
+            </button>
+            <div id="dataPreviewContent" class="hidden p-4 overflow-x-auto">
+                <table id="dataPreviewTable" class="w-full text-xs text-slate-300"></table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footerText" class="p-6 text-center text-slate-500 text-xs">
+        &copy; 2025 P&L Analyzer Pro
+    </footer>
+
+    <!-- Dashboard Logic -->
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+        const COLORS = ["#6366f1", "#ef4444", "#f59e0b", "#22c55e", "#ec4899", "#06b6d4", "#8b5cf6"];
+
+        // ── Session cache helpers ────────────────────────────────
+        const KPI_KEY = "pl_dashboard_kpis";
+        const CHART_KEY = "pl_dashboard_charts";
+        const CHAT_KEY = "pl_dashboard_chat";
+
+        function _get(key) {
+            try { const v = sessionStorage.getItem(key); return v ? JSON.parse(v) : null; }
+            catch { return null; }
+        }
+        function _set(key, value) {
+            try { sessionStorage.setItem(key, JSON.stringify(value)); } catch { }
+        }
+
+        // ── Init ────────────────────────────────────────────────
+        document.addEventListener("DOMContentLoaded", async () => {
+            const filename = sessionStorage.getItem("pl_filename");
+            if (!filename) { window.location.href = "index.html"; return; }
+
+            document.getElementById("breadcrumbFile").textContent = filename;
+
+            const cachedKpis = _get(KPI_KEY);
+            const cachedCharts = _get(CHART_KEY);
+            const cachedChat = _get(CHAT_KEY);
+
+            // Restore chat history immediately — no API call needed
+            if (cachedChat) restoreChat(cachedChat);
+
+            if (cachedKpis && cachedCharts) {
+                // Cache hit — render instantly without any API calls
+                renderKPIs(cachedKpis);
+                cachedCharts.forEach(chart => renderChart(chart));
+                document.getElementById("footerText").innerHTML =
+                    `&copy; 2025 P&L Analyzer Pro &bull; Loaded from session cache`;
+                document.getElementById("dataPreviewSection").classList.remove("hidden");
+            } else {
+                // Cache miss — fetch fresh from API and store
+                document.getElementById("footerText").innerHTML =
+                    `&copy; 2025 P&L Analyzer Pro &bull; Data synchronized ${new Date().toLocaleTimeString()}`;
+                await Promise.all([loadKPIs(), loadCharts()]);
+                document.getElementById("dataPreviewSection").classList.remove("hidden");
+                // B1: Auto-generate executive summary on first load
+                autoGenerateSummary();
+            }
+        });
+
+        function formatVal(val) {
+            if (val === 0) return '₹0K';
+            const abs = Math.abs(val);
+            const prefix = val < 0 ? '-₹' : '₹';
+            if (abs >= 1e6) return `${prefix}${(abs / 1e6).toFixed(1)}M`;
+            if (abs >= 1e3) return `${prefix}${(abs / 1e3).toFixed(0)}K`;
+            return `${prefix}${abs.toFixed(0)}`;
+        }
+
+        // ── KPI renderer (shared by live fetch + cache restore) ────
+        function renderKPIs(k, latestPeriod) {
+            // C2: Period label
+            if (latestPeriod) {
+                document.getElementById("kpiPeriodLabel").textContent = latestPeriod;
+            }
+            if (k.revenue != null) {
+                document.getElementById("kpiRevenue").textContent = formatVal(k.revenue);
+                // A1: Revenue growth
+                const wrap = document.getElementById("kpiRevenueChangeWrap");
+                if (k.revenue_growth_pct != null) {
+                    const g = k.revenue_growth_pct;
+                    const icon = g >= 0 ? '↑' : '↓';
+                    const color = g >= 0 ? 'text-emerald-400' : 'text-rose-400';
+                    wrap.className = `flex items-center ${color} text-sm font-bold`;
+                    document.getElementById("kpiRevenueChange").textContent = `${icon} ${Math.abs(g).toFixed(1)}%`;
+                } else {
+                    document.getElementById("kpiRevenueChange").textContent = "—";
+                }
+            }
+            if (k.net_income != null) {
+                document.getElementById("kpiNetIncome").textContent = formatVal(k.net_income);
+                const badge = document.getElementById("kpiNetBadge");
+                if (k.net_income > 0) {
+                    badge.textContent = "Profit";
+                    badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/10 text-emerald-400 uppercase tracking-wider";
+                } else {
+                    badge.textContent = `Loss ${formatVal(k.net_income)}`;
+                    badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-rose-500/10 text-rose-400 uppercase tracking-wider";
+                }
+            }
+            if (k.gross_margin_pct != null) {
+                document.getElementById("kpiGrossMargin").textContent = `${k.gross_margin_pct.toFixed(0)}%`;
+                document.getElementById("gaugeGross").setAttribute("stroke-dasharray",
+                    `${Math.min(k.gross_margin_pct, 100)} ${Math.max(100 - k.gross_margin_pct, 0)}`);
+                // B2: Health interpretation
+                document.getElementById("kpiGrossHealth").textContent = marginHealth(k.gross_margin_pct);
+                document.getElementById("kpiGrossHealth").className = `text-[11px] mt-1 ${marginHealthColor(k.gross_margin_pct)}`;
+            }
+            if (k.operating_margin_pct != null) {
+                document.getElementById("kpiOpMargin").textContent = `${k.operating_margin_pct.toFixed(0)}%`;
+                document.getElementById("opMarginBar").style.width = `${Math.min(Math.max(k.operating_margin_pct, 0), 100)}%`;
+                document.getElementById("kpiOpHealth").textContent = marginHealth(k.operating_margin_pct);
+                document.getElementById("kpiOpHealth").className = `text-[11px] mt-1 ${marginHealthColor(k.operating_margin_pct)}`;
+            }
+            // C1: EBITDA Margin
+            if (k.ebitda_margin_pct != null) {
+                document.getElementById("kpiEbitdaMargin").textContent = `${k.ebitda_margin_pct.toFixed(0)}%`;
+                document.getElementById("ebitdaMarginBar").style.width = `${Math.min(Math.max(k.ebitda_margin_pct, 0), 100)}%`;
+                document.getElementById("kpiEbitdaHealth").textContent = marginHealth(k.ebitda_margin_pct);
+                document.getElementById("kpiEbitdaHealth").className = `text-[11px] mt-1 ${marginHealthColor(k.ebitda_margin_pct)}`;
+            }
+        }
+
+        // B2: Health interpretation helpers
+        function marginHealth(pct) {
+            if (pct >= 30) return '● Healthy';
+            if (pct >= 15) return '● Moderate';
+            if (pct >= 0) return '● Low';
+            return '● Negative';
+        }
+        function marginHealthColor(pct) {
+            if (pct >= 30) return 'text-emerald-400';
+            if (pct >= 15) return 'text-amber-400';
+            if (pct >= 0) return 'text-rose-400';
+            return 'text-rose-500';
+        }
+
+        // ── Load KPIs ───────────────────────────────────────────
+        async function loadKPIs() {
+            try {
+                const res = await fetch(`${API_BASE}/api/kpis`);
+                if (!res.ok) throw new Error("KPI fetch failed");
+                const data = await res.json();
+                _set(KPI_KEY, data.kpis);
+                renderKPIs(data.kpis, data.latest_period);
+            } catch (e) {
+                console.error("KPI error:", e);
+                const stored = sessionStorage.getItem("pl_upload");
+                if (stored) {
+                    const upload = JSON.parse(stored);
+                    if (upload.kpis) { _set(KPI_KEY, upload.kpis); renderKPIs(upload.kpis); }
+                }
+            }
+        }
+
+        // ── Chart dispatcher (shared by live fetch + cache restore) ──
+        function renderChart(chart) {
+            switch (chart.chart_type) {
+                case "bar": renderBarChart(chart); break;
+                case "pie": renderPieChart(chart); break;
+                case "waterfall": renderWaterfallChart(chart); break;
+                case "gauge": renderMarginChart(chart); break;
+            }
+        }
+
+        // ── Load Charts ─────────────────────────────────────────
+        async function loadCharts() {
+            try {
+                const res = await fetch(`${API_BASE}/api/chart-data`);
+                if (!res.ok) throw new Error("Chart data fetch failed");
+                const data = await res.json();
+                _set(CHART_KEY, data.charts);   // persist to session
+                data.charts.forEach(chart => renderChart(chart));
+            } catch (e) {
+                console.error("Chart error:", e);
+                document.getElementById("barChart").innerHTML =
+                    `<p class="text-slate-500 text-sm m-auto">Chart data unavailable. Upload a file first.</p>`;
+            }
+        }
+
+        // ── Bar Chart ───────────────────────────────────────────
+        function renderBarChart(chart) {
+            const container = document.getElementById("barChart");
+            const legendEl = document.getElementById("barLegend");
+            if (!chart.series.length) { container.innerHTML = `<p class="text-slate-500 text-sm m-auto">No bar chart data</p>`; return; }
+
+            // Find max value for scaling
+            const allValues = chart.series.flatMap(s => s.values.filter(v => v != null));
+            const maxVal = Math.max(...allValues, 1);
+
+            // Get labels (periods) from the first series
+            const labels = chart.series[0].labels || [];
+
+            let html = `<div class="relative h-full w-full flex items-end justify-around gap-2 pb-2">`;
+            // Horizontal grid lines
+            html += `<div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] text-slate-500 pr-2">`;
+            for (let i = 0; i < 4; i++) {
+                const val = maxVal * (1 - i / 3);
+                const formatted = val >= 1e6 ? `₹${(val / 1e6).toFixed(1)}M` : `₹${(val / 1e3).toFixed(0)}K`;
+                html += `<div class="border-b border-slate-700/50 border-dashed w-full flex justify-between items-end pb-1"><span>${formatted}</span></div>`;
+            }
+            html += `</div>`;
+
+            // Group bars by period
+            labels.forEach((label, li) => {
+                html += `<div class="flex flex-col items-center gap-2 h-full justify-end w-full max-w-[80px] z-10">`;
+                html += `<div class="flex gap-1 items-end h-[80%] w-full">`;
+                chart.series.forEach((s, si) => {
+                    const val = s.values[li] || 0;
+                    const pct = Math.max((Math.abs(val) / maxVal) * 100, 2);
+                    const color = s.color || COLORS[si % COLORS.length];
+                    html += `<div class="bar w-full rounded-t" style="background:${color}; height:${pct}%" title="${s.name}: ₹${(Math.abs(val) / 1e6).toFixed(1)}M"></div>`;
+                });
+                html += `</div><span class="text-xs text-slate-500">${label}</span></div>`;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+
+            // Legend
+            legendEl.innerHTML = chart.series.map((s, i) => {
+                const color = s.color || COLORS[i % COLORS.length];
+                return `<div class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm" style="background:${color}"></span> ${s.name}</div>`;
+            }).join("");
+        }
+
+        // ── Pie/Donut Chart ─────────────────────────────────────
+        function renderPieChart(chart) {
+            const container = document.getElementById("pieChart");
+            const s = chart.series[0];
+            if (!s || !s.values.length) { container.innerHTML = `<p class="text-slate-500 text-sm">No expense data</p>`; return; }
+
+            const total = s.values.reduce((a, b) => a + (b || 0), 0);
+            const pieColors = ["#6366f1", "#ec4899", "#06b6d4", "#f59e0b", "#22c55e", "#8b5cf6"];
+
+            // Build donut SVG
+            let offset = 0;
+            let circles = `<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#334155" stroke-width="6"/>`;
+            s.values.forEach((val, i) => {
+                if (!val) return;
+                const pct = (val / total) * 100;
+                const color = pieColors[i % pieColors.length];
+                circles += `<circle cx="21" cy="21" r="15.915" fill="transparent" stroke="${color}" stroke-width="6" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${-offset}"/>`;
+                offset += pct;
+            });
+
+            const totalFormatted = total >= 1e6 ? `₹${(total / 1e6).toFixed(1)}M` : `₹${(total / 1e3).toFixed(0)}K`;
+
+            let html = `
+                <div class="relative w-48 h-48">
+                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 42 42">${circles}</svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-slate-400 text-xs">Total</span>
+                        <span class="text-xl font-bold">${totalFormatted}</span>
+                    </div>
+                </div>
+                <div class="space-y-2 text-sm">
+            `;
+
+            s.labels.forEach((label, i) => {
+                const val = s.values[i] || 0;
+                const pct = ((val / total) * 100).toFixed(0);
+                const color = pieColors[i % pieColors.length];
+                const formatted = val >= 1e6 ? `₹${(val / 1e6).toFixed(2)}M` : `₹${(val / 1e3).toFixed(0)}K`;
+                html += `<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background:${color}"></span> ${label} (${pct}%) - ${formatted}</div>`;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // ── Waterfall Chart ─────────────────────────────────────
+        function renderWaterfallChart(chart) {
+            const container = document.getElementById("waterfallChart");
+            const s = chart.series[0];
+            if (!s || !s.values.length) { container.innerHTML = `<p class="text-slate-500 text-sm m-auto">No waterfall data</p>`; return; }
+
+            const maxVal = Math.max(...s.values.map(v => Math.abs(v || 0)), 1);
+
+            // Grid lines
+            let html = `<div class="relative h-full w-full flex items-end gap-1 px-4">`;
+            html += `<div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] text-slate-500 pr-4">`;
+            for (let i = 0; i < 4; i++) {
+                const val = maxVal * (1 - i / 3);
+                const formatted = val >= 1e6 ? `₹${(val / 1e6).toFixed(1)}M` : `₹${(val / 1e3).toFixed(0)}K`;
+                html += `<div class="border-b border-slate-700/50 border-dashed w-full flex justify-between items-end pb-1"><span>${formatted}</span></div>`;
+            }
+            html += `</div>`;
+
+            // Build waterfall bars
+            let runningTotal = 0;
+            s.labels.forEach((label, i) => {
+                const val = s.values[i] || 0;
+                const isPositive = val >= 0;
+                const isFirst = i === 0;
+                const isLast = i === s.labels.length - 1;
+
+                if (isFirst || isLast) {
+                    // Full bars from bottom
+                    const pct = (Math.abs(val) / maxVal) * 90;
+                    const color = isFirst ? "bg-emerald-500/80" : "bg-indigo-500";
+                    html += `
+                        <div class="flex-1 flex flex-col justify-end h-full z-10">
+                            <div class="${color} w-full rounded-t bar" style="height:${pct}%" title="${label}: ₹${(Math.abs(val) / 1e6).toFixed(1)}M"></div>
+                            <span class="text-[10px] text-slate-500 mt-2 text-center">${label}</span>
+                        </div>
+                    `;
+                    runningTotal = isFirst ? val : runningTotal;
+                } else {
+                    // Floating decrease bars
+                    const barHeight = (Math.abs(val) / maxVal) * 90;
+                    const bottomOffset = ((runningTotal + val) / maxVal) * 90;
+                    runningTotal += val;
+                    html += `
+                        <div class="flex-1 flex flex-col justify-end h-full relative z-10">
+                            <div class="bg-rose-500/80 w-full rounded bar" style="height:${barHeight}%; position:absolute; bottom:${Math.max(bottomOffset, 0)}%" title="${label}: -₹${(Math.abs(val) / 1e6).toFixed(1)}M"></div>
+                            <span class="text-[10px] text-slate-500 mt-2 text-center self-end w-full">${label}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // ── Margin Analysis Chart ───────────────────────────────
+        function renderMarginChart(chart) {
+            const container = document.getElementById("marginChart");
+            const s = chart.series[0];
+            if (!s || !s.values.length) { container.innerHTML = `<p class="text-slate-500 text-sm">No margin data</p>`; return; }
+
+            const marginColors = ["#fbbf24", "#22d3ee", "#6366f1", "#a78bfa"];
+
+            container.innerHTML = s.labels.map((label, i) => {
+                const val = s.values[i] || 0;
+                const color = marginColors[i % marginColors.length];
+                return `
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-400">${label}</span>
+                            <span class="font-semibold">${val.toFixed(1)}%</span>
+                        </div>
+                        <div class="h-3 w-full bg-slate-700 rounded-full">
+                            <div class="h-full rounded-full margin-bar" style="width:${Math.min(val, 100)}%; background:${color}"></div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        // ── AI Chat ─────────────────────────────────────────────
+        const chatInput = document.getElementById("chatInput");
+        const chatSend = document.getElementById("chatSend");
+        const chatMessages = document.getElementById("chatMessages");
+
+        chatSend.addEventListener("click", sendChat);
+        chatInput.addEventListener("keydown", (e) => { if (e.key === "Enter") sendChat(); });
+
+        async function sendChat() {
+            const question = chatInput.value.trim();
+            if (!question) return;
+
+            // Add user message
+            chatMessages.innerHTML += `
+                <div class="flex gap-3 max-w-[80%] ml-auto justify-end fade-in">
+                    <div class="bg-indigo-600 p-3 rounded-2xl rounded-tr-none text-sm text-white leading-relaxed">${escapeHtml(question)}</div>
+                    <div class="w-8 h-8 rounded-full bg-slate-600 flex-shrink-0 flex items-center justify-center text-[10px] font-bold">You</div>
+                </div>
+            `;
+            chatInput.value = "";
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Show typing indicator
+            const typingId = "typing-" + Date.now();
+            chatMessages.innerHTML += `
+                <div id="${typingId}" class="flex gap-3 max-w-[80%] fade-in">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 flex-shrink-0 flex items-center justify-center text-[10px] font-bold">AI</div>
+                    <div class="bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-400">
+                        <span class="inline-block w-2 h-2 bg-slate-500 rounded-full animate-bounce mr-1"></span>
+                        <span class="inline-block w-2 h-2 bg-slate-500 rounded-full animate-bounce mr-1" style="animation-delay:0.15s"></span>
+                        <span class="inline-block w-2 h-2 bg-slate-500 rounded-full animate-bounce" style="animation-delay:0.3s"></span>
+                    </div>
+                </div>
+            `;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question }),
+                });
+
+                const typing = document.getElementById(typingId);
+                if (typing) typing.remove();
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || "Query failed");
+                }
+
+                const data = await res.json();
+                const answer = (data.answer || "No response").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+                // B4: Confidence badge
+                const conf = data.confidence_score || 0;
+                const confColor = conf > 0.7 ? 'bg-emerald-500/20 text-emerald-400' : conf > 0.4 ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400';
+                const confBadge = `<span class="inline-block ${confColor} px-2 py-0.5 rounded text-[10px] font-bold ml-2">🎯 ${(conf * 100).toFixed(0)}%</span>`;
+
+                // B3: Hallucination flags
+                let flagsHtml = '';
+                if (data.hallucination_flags && data.hallucination_flags.length > 0) {
+                    flagsHtml = `<div class="mt-2 space-y-1">${data.hallucination_flags.map(f =>
+                        `<div class="text-[11px] text-amber-400 bg-amber-500/10 px-2 py-1 rounded">${escapeHtml(f)}</div>`
+                    ).join('')}</div>`;
+                }
+
+                chatMessages.innerHTML += `
+                    <div class="flex gap-3 max-w-[80%] fade-in">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 flex-shrink-0 flex items-center justify-center text-[10px] font-bold">AI</div>
+                        <div class="bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-300 leading-relaxed">
+                            ${answer}${confBadge}${flagsHtml}
+                        </div>
+                    </div>
+                `;
+                _set(CHAT_KEY, chatMessages.innerHTML);
+            } catch (error) {
+                const typing = document.getElementById(typingId);
+                if (typing) typing.remove();
+
+                chatMessages.innerHTML += `
+                    <div class="flex gap-3 max-w-[80%] fade-in">
+                        <div class="w-8 h-8 rounded-full bg-rose-600 flex-shrink-0 flex items-center justify-center text-[10px] font-bold">!</div>
+                        <div class="bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-rose-300 leading-relaxed">${error.message}</div>
+                    </div>
+                `;
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // ── Restore chat from session ───────────────────────────
+        function restoreChat(html) {
+            document.getElementById("chatMessages").innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // C4: Suggested question click handler
+        function askSuggested(question) {
+            document.getElementById("chatInput").value = question;
+            sendChat();
+        }
+
+        // C3: Data preview toggle + loader
+        function toggleDataPreview() {
+            const content = document.getElementById("dataPreviewContent");
+            const toggle = document.getElementById("dataPreviewToggle");
+            if (content.classList.contains("hidden")) {
+                content.classList.remove("hidden");
+                toggle.textContent = "▲ Hide";
+                loadDataPreview();
+            } else {
+                content.classList.add("hidden");
+                toggle.textContent = "▼ Show";
+            }
+        }
+
+        async function loadDataPreview() {
+            try {
+                const res = await fetch(`${API_BASE}/api/data-preview`);
+                if (!res.ok) throw new Error("Data preview failed");
+                const data = await res.json();
+                const table = document.getElementById("dataPreviewTable");
+                let html = '<thead><tr class="border-b border-slate-700">';
+                data.columns.forEach(c => html += `<th class="px-3 py-2 text-left text-slate-400 font-medium">${escapeHtml(String(c))}</th>`);
+                html += '</tr></thead><tbody>';
+                data.rows.forEach(row => {
+                    html += '<tr class="border-b border-slate-800 hover:bg-slate-800/50">';
+                    data.columns.forEach(c => {
+                        const val = row[c];
+                        const formatted = val == null ? '—' : typeof val === 'number' ? `₹${val.toLocaleString()}` : escapeHtml(String(val));
+                        html += `<td class="px-3 py-1.5 whitespace-nowrap">${formatted}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += `</tbody><tfoot><tr><td colspan="${data.columns.length}" class="px-3 py-2 text-slate-500">Showing ${data.rows.length} of ${data.total_rows} rows</td></tr></tfoot>`;
+                table.innerHTML = html;
+            } catch (e) {
+                console.error("Data preview error:", e);
+                document.getElementById("dataPreviewTable").innerHTML = '<tr><td class="text-slate-500 p-4">Data preview unavailable</td></tr>';
+            }
+        }
+
+        // B1: Auto-generate summary on load
+        async function autoGenerateSummary() {
+            try {
+                const res = await fetch(`${API_BASE}/api/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: "Summarize this P&L" }),
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                const answer = (data.answer || "").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+                if (!answer) return;
+
+                const conf = data.confidence_score || 0;
+                const confColor = conf > 0.7 ? 'bg-emerald-500/20 text-emerald-400' : conf > 0.4 ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400';
+                const confBadge = `<span class="inline-block ${confColor} px-2 py-0.5 rounded text-[10px] font-bold ml-2">🎯 ${(conf * 100).toFixed(0)}%</span>`;
+
+                chatMessages.innerHTML += `
+                    <div class="flex gap-3 max-w-[80%] fade-in">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 flex-shrink-0 flex items-center justify-center text-[10px] font-bold">AI</div>
+                        <div class="bg-slate-800 p-3 rounded-2xl rounded-tl-none text-sm text-slate-300 leading-relaxed">
+                            <div class="text-[10px] text-indigo-400 font-bold mb-1">📊 AUTO-GENERATED SUMMARY</div>
+                            ${answer}${confBadge}
+                        </div>
+                    </div>
+                `;
+                _set(CHAT_KEY, chatMessages.innerHTML);
+            } catch (e) {
+                console.error("Auto-summary error:", e);
+            }
+        }
+    </script>
+</body>
+
+</html>
