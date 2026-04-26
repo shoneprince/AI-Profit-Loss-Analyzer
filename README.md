@@ -185,8 +185,6 @@ AI P&L Analyzer/
 │   └── 🗄️  vectorstore/
 │       └── store.py                 # Build, save, and load the FAISS index
 │
-├── 🧪 tests/
-│   └── test_pipeline.py             # Unit and integration tests
 │
 ├── .env                             # 🔑 Secret environment variables (not committed)
 ├── .gitignore                       # Files excluded from version control
