@@ -226,6 +226,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 **Built with ❤️ using Python, FastAPI & Google Gemini**
 
-*If you found this project useful, consider giving it a ⭐ on GitHub!*
+If you find this project interesting, feel free to ⭐ the repository or connect with me on LinkedIn! -
+https://www.linkedin.com/in/shone-prince/
 
 </div>
