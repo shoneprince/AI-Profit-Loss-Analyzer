@@ -80,7 +80,7 @@ By seamlessly ingesting raw financial documents (PDFs, Excel, or CSVs), this pro
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | **Language** | ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white) | Core runtime |
-| **AI / LLM** | ![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-FF6D00?style=flat-square&logo=google&logoColor=white) | Conversational intelligence |
+| **AI / LLM** | ![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-Lite-FF6D00?style=flat-square&logo=google&logoColor=white) | Conversational intelligence |
 | **Vector Store** | ![FAISS](https://img.shields.io/badge/FAISS-6C757D?style=flat-square) | Semantic document retrieval |
 | **Data Processing** | ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white) | Financial data wrangling |
 | **Backend** | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) + Uvicorn | REST API server |
@@ -138,19 +138,6 @@ GOOGLE_API_KEY=your_gemini_api_key_here
 uvicorn src.api.server:app --reload
 ```
 
-Then open your browser and go to: **`http://127.0.0.1:8000/`** 🎉
-
----
-
-### 🖥️ Optional — Run the CLI Pipeline
-
-If you prefer to run the analysis directly in the terminal without the web UI:
-```bash
-python main.py --file "path/to/financial_statement.pdf"
-```
-
----
-
 ## 🗂️ Repository Structure
 
 ```
@@ -202,16 +189,16 @@ AI P&L Analyzer/
 This application demonstrates the **complete lifecycle of an applied Generative AI financial tool** across three core engineering disciplines:
 
 ```
-┌─────────────────────┐      ┌───────────────────────┐    ┌──────────────────────┐
-│   Data Engineering  │      │    AI Integration     │    │ Software Engineering │
-├─────────────────────┤      ├───────────────────────┤    ├──────────────────────┤
-│ Parsing unstructured│      │ Building a robust     │    │ Packaging complex    │
-│ financial tables    │───▶ │ RAG architecture       │───▶│ data science into a │
-│ Standardizing terms │      │ that grounds LLMs     │    │ production-ready     │
-│ Handling missing    │      │ in factual, vectorized│    │ full-stack app for   │
-│ data & formats      │      │ data — reducing       │    │ financial analysts   │
-│                     │      │ hallucinations        │    │ and end-users        │
-└─────────────────────┘      └───────────────────────┘    └──────────────────────┘
+┌─────────────────────┐      ┌───────────────────────┐     ┌──────────────────────┐
+│   Data Engineering  │      │    AI Integration     │     │ Software Engineering │
+├─────────────────────┤      ├───────────────────────┤     ├──────────────────────┤
+│ Parsing unstructured│      │ Building a robust     │     │ Packaging complex    │
+│ financial tables    │───▶ │ RAG architecture       │───▶│ data science into a  │
+│ Standardizing terms │      │ that grounds LLMs     │     │ production-ready     │
+│ Handling missing    │      │ in factual, vectorized│     │ full-stack app for   │
+│ data & formats      │      │ data — reducing       │     │ financial analysts   │
+│                     │      │ hallucinations        │     │ and end-users        │
+└─────────────────────┘      └───────────────────────┘     └──────────────────────┘
 ```
 
 ---
