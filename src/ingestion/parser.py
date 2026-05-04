@@ -77,23 +77,31 @@ def _ocr_with_gemini(file_path: str) -> pd.DataFrame:
     """
     Use Gemini Vision to OCR a scanned PDF and extract P&L table data.
     Processes multiple pages and merges results.
+    
+    API key and model are read from environment variables:
+    GOOGLE_API_KEY  — required
     """
     try:
         import io
         import base64
         import json
         import json_repair
-        import sys
-        
-        # Add project root to path for config
-        PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        sys.path.insert(0, PROJECT_ROOT)
-        import config
 
-        # Use google-generativeai SDK (same as langchain-google-genai uses)
-        import google.generativeai as genai
-        genai.configure(api_key=config.GOOGLE_API_KEY)
-        model = genai.GenerativeModel(config.LLM_MODEL)
+        from google import genai
+        from google.genai import types
+        import PIL.Image
+        
+        # ── Read credentials from environment (HF Spaces / Railway / .env) ──
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "GOOGLE_API_KEY not found."
+                "Add it as a secret in your Hugging Face Space settings, "
+                "or create a .env file with GOOGLE_API_KEY=<your_key>."
+            )
+
+        llm_model = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite-preview")
+        client = genai.Client(api_key=api_key)
 
         print("[Parser] Converting PDF pages to images for Vision API...")
 
@@ -119,12 +127,16 @@ def _ocr_with_gemini(file_path: str) -> pd.DataFrame:
                     "No markdown, no backticks, no explanations."
                 )
 
-                import PIL.Image
                 pil_img = PIL.Image.open(io.BytesIO(img_bytes))
 
-                response = model.generate_content(
-                    [prompt, pil_img],
-                    generation_config={"max_output_tokens": 4000, "temperature": 0.0},
+                # ✅ Use client.models.generate_content (new google-genai SDK)
+                response = client.models.generate_content(
+                    model=llm_model,
+                    contents=[prompt, pil_img],
+                    config=types.GenerateContentConfig(
+                        max_output_tokens=4000,
+                        temperature=0.0,
+                    ),
                 )
 
                 json_text = response.text.strip()
@@ -202,7 +214,7 @@ def ingest_document(file_path: str, **kwargs) -> pd.DataFrame:
     parser = parsers.get(ext)
     if parser is None:
         raise ValueError(
-            f"Unsupported file format: '{ext}'. "
+            f"Unsupported file format: '{ext}'. "   
             f"Supported: {', '.join(parsers.keys())}"
         )
 
