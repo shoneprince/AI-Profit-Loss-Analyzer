@@ -215,5 +215,6 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 If you find this project interesting, feel free to ⭐ the repository or connect with me on LinkedIn! -
 https://www.linkedin.com/in/shone-prince/
+https://huggingface.co/spaces/Shoneprince/AI-Profit_and_loss-Analyzer
 
 </div>
