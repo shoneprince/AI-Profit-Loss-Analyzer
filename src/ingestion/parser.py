@@ -96,8 +96,6 @@ def _ocr_with_gemini(file_path: str) -> pd.DataFrame:
         if not api_key:
             raise ValueError(
                 "GOOGLE_API_KEY not found."
-                "Add it as a secret in your Hugging Face Space settings, "
-                "or create a .env file with GOOGLE_API_KEY=<your_key>."
             )
 
         llm_model = os.environ.get("LLM_MODEL", "gemini-3.1-flash-lite-preview")
