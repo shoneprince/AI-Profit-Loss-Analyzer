@@ -18,7 +18,7 @@ if not GOOGLE_API_KEY:
     )
 
 # ── Model Settings ──────────────────────────────────────────────────
-LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.1-flash-lite-preview")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.5-flash")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.0"))
 
