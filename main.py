@@ -124,7 +124,7 @@ def main():
         retriever = get_retriever(vectorstore)
 
     # ── Step 6: Build RAG chain ──────────────────────────────────
-    print("\n🤖 Step 6: Building RAG chain with Gemini 2.5 Flash …")
+    print("\n🤖 Step 6: Building RAG chain with Gemini 3.5 Flash …")
     chain = build_rag_chain(retriever)
     print("   Chain ready!\n")
 
