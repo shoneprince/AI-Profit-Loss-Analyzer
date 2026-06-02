@@ -12,7 +12,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688?style=flat-square&logo=fastapi&logoColor=white)
-![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-AI%20Powered-FF6D00?style=flat-square&logo=google&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini_3.5_Flash-AI%20Powered-FF6D00?style=flat-square&logo=google&logoColor=white)
 ![FAISS](https://img.shields.io/badge/FAISS-Vector%20Store-6C757D?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)
@@ -45,7 +45,7 @@ By seamlessly ingesting raw financial documents (PDFs, Excel, or CSVs), this pro
 |---------|-------------|
 | **Intelligent Document Processing** | Automatically ingests and cleans structured or semi-structured financial documents (PDF, XLSX, CSV), handling varying formats with a centralized financial keyword ontology (`financial_keywords.py`) |
 | **Semantic Chunking & Vector Search** | Chunks financial data by section and builds a highly efficient FAISS vector store to ensure accurate and context-aware retrieval |
-| **AI Financial Analyst** | Integrates with **Google Gemini 2.5 Flash** to answer complex financial queries, generate revenue/expense summaries, and highlight risk factors with confidence scoring and source citations |
+| **AI Financial Analyst** | Integrates with **Google Gemini 3.5 Flash** to answer complex financial queries, generate revenue/expense summaries, and highlight risk factors with confidence scoring and source citations |
 
 </details>
 
@@ -80,7 +80,7 @@ By seamlessly ingesting raw financial documents (PDFs, Excel, or CSVs), this pro
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | **Language** | ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white) | Core runtime |
-| **AI / LLM** | ![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-Lite-FF6D00?style=flat-square&logo=google&logoColor=white) | Conversational intelligence |
+| **AI / LLM** | ![Gemini](https://img.shields.io/badge/Gemini_3.5_Flash-Lite-FF6D00?style=flat-square&logo=google&logoColor=white) | Conversational intelligence |
 | **Vector Store** | ![FAISS](https://img.shields.io/badge/FAISS-6C757D?style=flat-square) | Semantic document retrieval |
 | **Data Processing** | ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white) | Financial data wrangling |
 | **Backend** | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) + Uvicorn | REST API server |
