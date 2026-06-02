@@ -80,7 +80,7 @@ By seamlessly ingesting raw financial documents (PDFs, Excel, or CSVs), this pro
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
 | **Language** | ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white) | Core runtime |
-| **AI / LLM** | ![Gemini](https://img.shields.io/badge/Gemini_3.5_Flash-Lite-FF6D00?style=flat-square&logo=google&logoColor=white) | Conversational intelligence |
+| **AI / LLM** | ![Gemini](https://img.shields.io/badge/Gemini_3.5_Flash-FF6D00?style=flat-square&logo=google&logoColor=white) | Conversational intelligence |
 | **Vector Store** | ![FAISS](https://img.shields.io/badge/FAISS-6C757D?style=flat-square) | Semantic document retrieval |
 | **Data Processing** | ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white) | Financial data wrangling |
 | **Backend** | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) + Uvicorn | REST API server |
